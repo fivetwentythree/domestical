@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { TimelineRow as TimelineRowData } from '../../lib/api';
-import { LABEL_COL_WIDTH } from '../../lib/constants';
 import { getDayIndex, type ZoomLevel } from '../../lib/timelineMath';
 import { ZOOM_CONFIGS } from '../../lib/timelineMath';
 import { shiftDate } from '../../lib/dates';
 import { TimelineHeader } from './TimelineHeader';
 import { TimelineRow } from './TimelineRow';
+import { PropertyCell } from './PropertyCell';
 
 interface Props {
   rows: TimelineRowData[];
@@ -20,7 +20,8 @@ export function TimelineGrid({ rows, focusDate, start, zoom, onSelectEvent, onAd
   const config = ZOOM_CONFIGS[zoom];
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
-  const syncFrameRef = useRef<number | null>(null);
+  const propertyScrollRef = useRef<HTMLDivElement>(null);
+  const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
   const rangeEnd = useMemo(() => shiftDate(start, config.days), [start, config.days]);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export function TimelineGrid({ rows, focusDate, start, zoom, onSelectEvent, onAd
     const body = bodyScrollRef.current;
     if (!header || !body) return;
 
-    const visibleRailWidth = body.clientWidth - LABEL_COL_WIDTH;
+    const visibleRailWidth = body.clientWidth;
     if (visibleRailWidth <= 0) return;
 
     const focusIndex = getDayIndex(focusDate, start);
@@ -42,29 +43,60 @@ export function TimelineGrid({ rows, focusDate, start, zoom, onSelectEvent, onAd
   useEffect(() => {
     const header = headerScrollRef.current;
     const body = bodyScrollRef.current;
-    if (!header || !body) return;
+    const property = propertyScrollRef.current;
+    if (!header || !body || !property) return;
     const headerElement = header;
     const bodyElement = body;
+    const propertyElement = property;
+    let horizontalFrame: number | null = null;
+    let verticalFrame: number | null = null;
+    let syncingHorizontal = false;
+    let syncingVertical = false;
 
-    function syncScroll(source: HTMLElement, target: HTMLElement) {
-      if (syncFrameRef.current !== null) {
-        cancelAnimationFrame(syncFrameRef.current);
+    function syncHorizontal(source: HTMLElement, target: HTMLElement) {
+      if (horizontalFrame !== null) {
+        cancelAnimationFrame(horizontalFrame);
       }
 
+      syncingHorizontal = true;
       target.scrollLeft = source.scrollLeft;
-      syncFrameRef.current = requestAnimationFrame(() => {
-        syncFrameRef.current = null;
+      horizontalFrame = requestAnimationFrame(() => {
+        syncingHorizontal = false;
+        horizontalFrame = null;
+      });
+    }
+
+    function syncVertical(source: HTMLElement, target: HTMLElement) {
+      if (verticalFrame !== null) {
+        cancelAnimationFrame(verticalFrame);
+      }
+
+      syncingVertical = true;
+      target.scrollTop = source.scrollTop;
+      verticalFrame = requestAnimationFrame(() => {
+        syncingVertical = false;
+        verticalFrame = null;
       });
     }
 
     function handleHeaderScroll() {
-      if (syncFrameRef.current !== null) return;
-      syncScroll(headerElement, bodyElement);
+      if (syncingHorizontal) return;
+      syncHorizontal(headerElement, bodyElement);
     }
 
     function handleBodyScroll() {
-      if (syncFrameRef.current !== null) return;
-      syncScroll(bodyElement, headerElement);
+      if (!syncingHorizontal) {
+        syncHorizontal(bodyElement, headerElement);
+      }
+
+      if (!syncingVertical) {
+        syncVertical(bodyElement, propertyElement);
+      }
+    }
+
+    function handlePropertyScroll() {
+      if (syncingVertical) return;
+      syncVertical(propertyElement, bodyElement);
     }
 
     function handleHeaderWheel(event: WheelEvent) {
@@ -78,14 +110,19 @@ export function TimelineGrid({ rows, focusDate, start, zoom, onSelectEvent, onAd
 
     headerElement.addEventListener('scroll', handleHeaderScroll, { passive: true });
     bodyElement.addEventListener('scroll', handleBodyScroll, { passive: true });
+    propertyElement.addEventListener('scroll', handlePropertyScroll, { passive: true });
     headerElement.addEventListener('wheel', handleHeaderWheel, { passive: false });
 
     return () => {
       headerElement.removeEventListener('scroll', handleHeaderScroll);
       bodyElement.removeEventListener('scroll', handleBodyScroll);
+      propertyElement.removeEventListener('scroll', handlePropertyScroll);
       headerElement.removeEventListener('wheel', handleHeaderWheel);
-      if (syncFrameRef.current !== null) {
-        cancelAnimationFrame(syncFrameRef.current);
+      if (horizontalFrame !== null) {
+        cancelAnimationFrame(horizontalFrame);
+      }
+      if (verticalFrame !== null) {
+        cancelAnimationFrame(verticalFrame);
       }
     };
   }, []);
@@ -115,20 +152,51 @@ export function TimelineGrid({ rows, focusDate, start, zoom, onSelectEvent, onAd
 
   return (
     <div className="timeline-container">
-      <div className="timeline-header-shell" ref={headerScrollRef}>
-        <TimelineHeader start={start} zoom={zoom} />
+      <div className="timeline-header-shell">
+        <div className="timeline-header-fixed">
+          <div className="timeline-header-fixed-row timeline-header-fixed-row-months" />
+          <div className="timeline-header-fixed-row timeline-header-fixed-row-days">
+            <span className="timeline-side-label">Properties</span>
+          </div>
+        </div>
+        <div className="timeline-header-scroll" ref={headerScrollRef}>
+          <TimelineHeader start={start} zoom={zoom} />
+        </div>
       </div>
-      <div className="timeline-body" ref={bodyScrollRef}>
-        {rows.map((row) => (
-          <TimelineRow
-            key={row.property.id}
-            row={row}
-            start={start}
-            zoom={zoom}
-            rangeEnd={rangeEnd}
-            onSelectEvent={onSelectEvent}
-          />
-        ))}
+
+      <div className="timeline-body-shell">
+        <div className="timeline-property-column" ref={propertyScrollRef}>
+          {rows.map((row) => (
+            <div
+              key={row.property.id}
+              className={[
+                'timeline-property-row',
+                hoveredPropertyId === row.property.id && 'is-hovered',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onMouseEnter={() => setHoveredPropertyId(row.property.id)}
+              onMouseLeave={() => setHoveredPropertyId(null)}
+            >
+              <PropertyCell property={row.property} />
+            </div>
+          ))}
+        </div>
+
+        <div className="timeline-body" ref={bodyScrollRef}>
+          {rows.map((row) => (
+            <TimelineRow
+              key={row.property.id}
+              row={row}
+              start={start}
+              zoom={zoom}
+              rangeEnd={rangeEnd}
+              onSelectEvent={onSelectEvent}
+              isHovered={hoveredPropertyId === row.property.id}
+              onHoverChange={setHoveredPropertyId}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

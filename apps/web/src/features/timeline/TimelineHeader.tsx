@@ -37,7 +37,6 @@ export const TimelineHeader = memo(function TimelineHeader({ start, zoom }: Prop
   return (
     <div className="timeline-header">
       <div className="timeline-header-row timeline-header-row-months">
-        <div className="timeline-header-spacer timeline-header-spacer-months" />
         <div className="timeline-header-months">
           {months.map((month) => (
             <div
@@ -55,9 +54,6 @@ export const TimelineHeader = memo(function TimelineHeader({ start, zoom }: Prop
       </div>
 
       <div className="timeline-header-row timeline-header-row-days">
-        <div className="timeline-header-spacer timeline-header-spacer-days">
-          <span className="timeline-side-label">Properties</span>
-        </div>
         <div className="timeline-header-days">
           {days.map((day) => {
             const classes = [

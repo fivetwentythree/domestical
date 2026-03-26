@@ -3,7 +3,6 @@ import type { TimelineRow as TimelineRowType } from '../../lib/api';
 import type { ZoomLevel } from '../../lib/timelineMath';
 import { ZOOM_CONFIGS } from '../../lib/timelineMath';
 import { buildVisibleDays } from '../../lib/dates';
-import { PropertyCell } from './PropertyCell';
 import { EventBar } from './EventBar';
 
 interface Props {
@@ -12,6 +11,8 @@ interface Props {
   zoom: ZoomLevel;
   rangeEnd: string;
   onSelectEvent: (eventId: number) => void;
+  isHovered: boolean;
+  onHoverChange: (propertyId: number | null) => void;
 }
 
 export const TimelineRow = memo(function TimelineRow({
@@ -20,6 +21,8 @@ export const TimelineRow = memo(function TimelineRow({
   zoom,
   rangeEnd,
   onSelectEvent,
+  isHovered,
+  onHoverChange,
 }: Props) {
   const config = ZOOM_CONFIGS[zoom];
   const days = useMemo(() => buildVisibleDays(start, config.days), [start, config.days]);
@@ -38,8 +41,11 @@ export const TimelineRow = memo(function TimelineRow({
   const railWidth = config.days * config.dayWidth;
 
   return (
-    <div className="timeline-row">
-      <PropertyCell property={row.property} />
+    <div
+      className={['timeline-row', isHovered && 'is-hovered'].filter(Boolean).join(' ')}
+      onMouseEnter={() => onHoverChange(row.property.id)}
+      onMouseLeave={() => onHoverChange(null)}
+    >
       <div className="event-rail" style={{ width: railWidth, minWidth: railWidth }}>
         {/* Day backgrounds */}
         {days.map((day, index) => {
