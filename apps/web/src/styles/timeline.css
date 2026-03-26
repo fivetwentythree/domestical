@@ -40,7 +40,7 @@
 .timeline-header-fixed-row-days {
   height: var(--header-height);
   align-items: center;
-  padding: 0 14px;
+  padding: 0 16px;
 }
 
 .timeline-header-scroll {
@@ -163,9 +163,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 5px;
+  gap: 6px;
   height: var(--header-height);
-  padding: 6px 0 8px;
+  padding: 7px 0 9px;
   font-variant-numeric: tabular-nums;
   border-right: 1px solid var(--border-subtle);
   user-select: none;
@@ -236,8 +236,8 @@
   background: linear-gradient(180deg, #ffffff 0%, #fcfcfb 100%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 14px;
+  gap: 12px;
+  padding: 0 16px;
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -324,11 +324,49 @@
   border-left: 1px solid var(--gray-300);
 }
 
+.blocked-day {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  cursor: pointer;
+  background:
+    linear-gradient(
+      145deg,
+      transparent calc(50% - 1px),
+      rgba(87, 83, 78, 0.48) calc(50% - 0.5px),
+      rgba(87, 83, 78, 0.48) calc(50% + 0.5px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(180deg, rgba(245, 245, 244, 0.5) 0%, rgba(245, 245, 244, 0.24) 100%);
+  background-repeat: no-repeat;
+  box-shadow:
+    inset -1px 0 0 rgba(214, 211, 209, 0.76),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(214, 211, 209, 0.34);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blocked-day:hover {
+  background:
+    linear-gradient(
+      145deg,
+      transparent calc(50% - 1px),
+      rgba(68, 64, 60, 0.62) calc(50% - 0.5px),
+      rgba(68, 64, 60, 0.62) calc(50% + 0.5px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(180deg, rgba(231, 229, 228, 0.58) 0%, rgba(231, 229, 228, 0.32) 100%);
+  box-shadow:
+    inset -1px 0 0 rgba(168, 162, 158, 0.82),
+    inset 0 0 0 1px rgba(120, 113, 108, 0.18);
+}
+
 /* Event bars */
 .event-bar {
   position: absolute;
-  top: 9px;
-  height: 30px;
+  top: 10px;
+  height: calc(var(--row-height) - 20px);
   border-radius: var(--radius-full);
   cursor: pointer;
   display: flex;
@@ -411,9 +449,9 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  height: 52px;
-  padding: 0 20px;
+  gap: var(--space-4);
+  height: var(--toolbar-height);
+  padding: 0 24px;
   border-bottom: 1px solid var(--border-color);
   background: white;
   flex-shrink: 0;
@@ -697,8 +735,8 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  height: 48px;
-  padding: 0 20px;
+  height: 52px;
+  padding: 0 24px;
   background: var(--gray-950);
   flex-shrink: 0;
 }

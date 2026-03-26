@@ -39,6 +39,28 @@ export function clipEventToRange(
   return { startOffsetDays, spanDays, clippedStart, clippedEnd };
 }
 
+export function clipBlockedEventToRange(
+  startsOn: string,
+  endsOn: string,
+  rangeStart: string,
+  rangeEnd: string
+): {
+  startDay: number;
+  endDay: number;
+} | null {
+  const eventStart = startsOn < rangeStart ? rangeStart : startsOn;
+  const eventEnd = endsOn > rangeEnd ? rangeEnd : endsOn;
+
+  if (eventStart >= eventEnd) return null;
+
+  const startDay = getDayIndex(eventStart, rangeStart);
+  const endDay = getDayIndex(eventEnd, rangeStart);
+
+  if (endDay <= startDay) return null;
+
+  return { startDay, endDay };
+}
+
 export function getEventStyle(
   startOffsetDays: number,
   spanDays: number,

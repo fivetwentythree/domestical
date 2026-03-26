@@ -10,7 +10,7 @@ make sure the user interface is elegant and not stock ai slop
 
 # 1) Product goal
 
-Create a fast, elegant master calendar for multiple Airbnb properties using iCal feeds, with a UI that makes it effortless to:
+Create a fast, elegant master calendar for multiple Airbnb properties using iCal feeds, with a UI that makes it effortless to:  
 
 - see all properties in one place
 - scan availability quickly

@@ -56,10 +56,10 @@
   --color-success-light: #DCFCE7;
 
   /* Layout */
-  --label-col-width: 220px;
-  --row-height: 48px;
-  --header-height: 48px;
-  --toolbar-height: 52px;
+  --label-col-width: 232px;
+  --row-height: 52px;
+  --header-height: 52px;
+  --toolbar-height: 56px;
 
   /* Spacing */
   --space-1: 0.25rem;

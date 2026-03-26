@@ -3,6 +3,7 @@ import type { TimelineRow as TimelineRowType } from '../../lib/api';
 import type { ZoomLevel } from '../../lib/timelineMath';
 import { ZOOM_CONFIGS } from '../../lib/timelineMath';
 import { buildVisibleDays } from '../../lib/dates';
+import { BlockedRange } from './BlockedRange';
 import { EventBar } from './EventBar';
 
 interface Props {
@@ -26,18 +27,21 @@ export const TimelineRow = memo(function TimelineRow({
 }: Props) {
   const config = ZOOM_CONFIGS[zoom];
   const days = useMemo(() => buildVisibleDays(start, config.days), [start, config.days]);
-  const sortedEvents = useMemo(
-    () =>
-      [...row.events].sort((left, right) => {
-        const typeOrder = { blocked: 0, booked: 1 } as const;
-        return (
-          typeOrder[left.eventType] - typeOrder[right.eventType] ||
-          left.startsOn.localeCompare(right.startsOn) ||
-          left.endsOn.localeCompare(right.endsOn)
-        );
-      }),
-    [row.events]
-  );
+  const [blockedEvents, bookedEvents] = useMemo(() => {
+    const sortedEvents = [...row.events].sort((left, right) => {
+      const typeOrder = { blocked: 0, booked: 1 } as const;
+      return (
+        typeOrder[left.eventType] - typeOrder[right.eventType] ||
+        left.startsOn.localeCompare(right.startsOn) ||
+        left.endsOn.localeCompare(right.endsOn)
+      );
+    });
+
+    return [
+      sortedEvents.filter((event) => event.eventType === 'blocked'),
+      sortedEvents.filter((event) => event.eventType === 'booked'),
+    ];
+  }, [row.events]);
   const railWidth = config.days * config.dayWidth;
 
   return (
@@ -70,8 +74,20 @@ export const TimelineRow = memo(function TimelineRow({
           );
         })}
 
-        {/* Event bars */}
-        {sortedEvents.map((event) => (
+        {/* Blocked date pattern */}
+        {blockedEvents.map((event) => (
+          <BlockedRange
+            key={event.id}
+            event={event}
+            rangeStart={start}
+            rangeEnd={rangeEnd}
+            dayWidth={config.dayWidth}
+            onSelect={onSelectEvent}
+          />
+        ))}
+
+        {/* Booking bars */}
+        {bookedEvents.map((event) => (
           <EventBar
             key={event.id}
             event={event}
