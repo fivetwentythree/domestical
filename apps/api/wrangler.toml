@@ -1,0 +1,20 @@
+name = "atlas-calendar-api"
+main = "src/index.ts"
+compatibility_date = "2026-03-26"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[dev]
+port = 3001
+
+[vars]
+ALLOWED_ORIGIN = "http://localhost:5173"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "atlas-calendar"
+database_id = "d2016b10-3dd9-4494-883b-5d77e37e7b95"
+migrations_dir = "migrations"

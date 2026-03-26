@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.dev.vars
+.dev.vars.*
+.wrangler/
+*.db
+*.db-wal
+*.db-shm
+.DS_Store
