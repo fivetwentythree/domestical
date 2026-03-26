@@ -310,6 +310,18 @@
   z-index: 5;
 }
 
+.event-bar.is-clipped-start {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding-left: 8px;
+}
+
+.event-bar.is-clipped-end {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-right: 8px;
+}
+
 .event-bar.booked {
   background: #118b94;
   color: white;

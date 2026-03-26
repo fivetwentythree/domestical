@@ -26,7 +26,14 @@ export const EventBar = memo(function EventBar({
 
   return (
     <div
-      className={`event-bar ${event.eventType}`}
+      className={[
+        'event-bar',
+        event.eventType,
+        clipped.clippedStart && 'is-clipped-start',
+        clipped.clippedEnd && 'is-clipped-end',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={style}
       onClick={(e) => {
         e.stopPropagation();
@@ -34,7 +41,7 @@ export const EventBar = memo(function EventBar({
       }}
       title={label}
     >
-      <span className={`event-dot ${event.eventType}`} />
+      {!clipped.clippedStart && <span className={`event-dot ${event.eventType}`} />}
       {showLabel && <span className="event-label">{label}</span>}
     </div>
   );

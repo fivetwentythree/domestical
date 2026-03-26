@@ -17,7 +17,12 @@ export function clipEventToRange(
   endsOn: string,
   rangeStart: string,
   rangeEnd: string
-): { startOffsetDays: number; spanDays: number } | null {
+): {
+  startOffsetDays: number;
+  spanDays: number;
+  clippedStart: boolean;
+  clippedEnd: boolean;
+} | null {
   const eventStart = startsOn < rangeStart ? rangeStart : startsOn;
   const eventEnd = endsOn > rangeEnd ? rangeEnd : endsOn;
   const clippedStart = startsOn < rangeStart;
@@ -31,7 +36,7 @@ export function clipEventToRange(
 
   if (spanDays <= 0) return null;
 
-  return { startOffsetDays, spanDays };
+  return { startOffsetDays, spanDays, clippedStart, clippedEnd };
 }
 
 export function getEventStyle(
